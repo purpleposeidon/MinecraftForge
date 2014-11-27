@@ -29,4 +29,13 @@ public class Constants
         public static final int TAG_INT_ARRAY   = 11;
         public static final int TAG_ANY_NUMERIC = 99;
     }
+    
+    public static class RENDERTYPE
+    {
+        public static final int AIR = -1;
+        public static final int TESSELLATOR = 1;
+        public static final int TESR_OR_SOMETHING = 2;
+        public static final int BAKED_MODEL = 3;
+        public static final int SEGMENTED_MODEL = 4;
+    }
 }
