@@ -1,14 +1,13 @@
 --- ../src-base/minecraft/net/minecraft/client/renderer/BlockRendererDispatcher.java
 +++ ../src-work/minecraft/net/minecraft/client/renderer/BlockRendererDispatcher.java
-@@ -1,5 +1,7 @@
+@@ -1,5 +1,6 @@
  package net.minecraft.client.renderer;
  
 +import java.util.ArrayList;
-+
  import net.minecraft.block.Block;
  import net.minecraft.block.state.IBlockState;
  import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-@@ -11,11 +13,14 @@
+@@ -11,11 +12,13 @@
  import net.minecraft.client.settings.GameSettings;
  import net.minecraft.crash.CrashReport;
  import net.minecraft.crash.CrashReportCategory;
@@ -19,11 +18,10 @@
  import net.minecraft.world.IBlockAccess;
  import net.minecraft.world.WorldType;
 +import net.minecraftforge.client.ITessellatorRenderer;
-+import net.minecraftforge.client.ISegmentedModel;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
  
-@@ -33,6 +38,11 @@
+@@ -33,6 +36,11 @@
      {
          this.field_175028_a = p_i46237_1_;
          this.field_175026_b = p_i46237_2_;
@@ -35,7 +33,7 @@
      }
  
      public BlockModelShapes func_175023_a()
-@@ -52,13 +62,27 @@
+@@ -52,6 +60,19 @@
              IBakedModel ibakedmodel1 = (new SimpleBakedModel.Builder(ibakedmodel, p_175020_3_)).func_177645_b();
              this.field_175027_c.func_178259_a(p_175020_4_, ibakedmodel1, p_175020_1_, p_175020_2_, Tessellator.func_178181_a().func_178180_c());
          }
@@ -46,8 +44,8 @@
 +        else if (i == 4)
 +        {
 +            WorldRenderer wr = Tessellator.func_178181_a().func_178180_c();
-+            block.getSegmentedModel().populate(p_175020_4_, p_175020_2_, p_175020_1_, modelSegments);
-+            for (IBakedModel model : modelSegments)
++            IBakedModel[] segments = block.getSegmentedModel().getModels(p_175020_4_, p_175020_2_, p_175020_1_);
++            for (IBakedModel model: segments)
 +            {
 +                this.field_175027_c.func_178259_a(p_175020_4_, model, p_175020_1_, p_175020_2_, wr);
 +            }
@@ -55,21 +53,12 @@
      }
  
      public boolean func_175018_a(IBlockState p_175018_1_, BlockPos p_175018_2_, IBlockAccess p_175018_3_, WorldRenderer p_175018_4_)
-     {
-+        Block block = p_175018_1_.func_177230_c();
-         try
-         {
--            int i = p_175018_1_.func_177230_c().func_149645_b();
-+            int i = block.func_149645_b();
- 
-             if (i == -1)
-             {
-@@ -69,12 +93,20 @@
+@@ -69,12 +90,20 @@
                  switch (i)
                  {
                      case 1:
 -                        return this.field_175025_e.func_178270_a(p_175018_3_, p_175018_1_, p_175018_2_, p_175018_4_);
-+                        return block.getTessellatorRenderer().func_178270_a(p_175018_3_, p_175018_1_, p_175018_2_, p_175018_4_);
++                        return p_175018_1_.func_177230_c().getTessellatorRenderer().func_178270_a(p_175018_3_, p_175018_1_, p_175018_2_, p_175018_4_);
                      case 2:
                          return false;
                      case 3:
@@ -77,8 +66,8 @@
                          return this.field_175027_c.func_178259_a(p_175018_3_, ibakedmodel, p_175018_1_, p_175018_2_, p_175018_4_);
 +                    case 4:
 +                        boolean any = false;
-+                        block.getSegmentedModel().populate(p_175018_3_, p_175018_2_, p_175018_1_, modelSegments);
-+                        for (IBakedModel model : modelSegments)
++                        IBakedModel[] segments = p_175018_1_.func_177230_c().getSegmentedModel().getModels(p_175018_3_, p_175018_2_, p_175018_1_);
++                        for (IBakedModel model : segments)
 +                        {
 +                            any |= this.field_175027_c.func_178259_a(p_175018_3_, model, p_175018_1_, p_175018_2_, p_175018_4_);
 +                        }
@@ -86,38 +75,15 @@
                      default:
                          return false;
                  }
-@@ -84,7 +116,7 @@
-         {
-             CrashReport crashreport = CrashReport.func_85055_a(throwable, "Tesselating block in world");
-             CrashReportCategory crashreportcategory = crashreport.func_85058_a("Block being tesselated");
--            CrashReportCategory.func_180523_a(crashreportcategory, p_175018_2_, p_175018_1_.func_177230_c(), p_175018_1_.func_177230_c().func_176201_c(p_175018_1_));
-+            CrashReportCategory.func_180523_a(crashreportcategory, p_175018_2_, block, block.func_176201_c(p_175018_1_));
-             throw new ReportedException(crashreport);
-         }
-     }
-@@ -134,7 +166,8 @@
- 
-     public void func_175016_a(IBlockState p_175016_1_, float p_175016_2_)
-     {
--        int i = p_175016_1_.func_177230_c().func_149645_b();
-+        Block block = p_175016_1_.func_177230_c();
-+        int i = block.func_149645_b();
- 
-         if (i != -1)
-         {
-@@ -142,9 +175,10 @@
+@@ -142,6 +171,7 @@
              {
                  case 1:
                  default:
-+                    block.getTessellatorRenderer().setModelBrightness(p_175016_1_, p_175016_2_);
++                    p_175016_1_.func_177230_c().getTessellatorRenderer().setModelBrightness(p_175016_1_, p_175016_2_);
                      break;
                  case 2:
--                    this.field_175024_d.func_178175_a(p_175016_1_.func_177230_c(), p_175016_2_);
-+                    this.field_175024_d.func_178175_a(block, p_175016_2_);
-                     break;
-                 case 3:
-                     IBakedModel ibakedmodel = this.func_175017_a(p_175016_1_, (BlockPos)null);
-@@ -169,5 +203,28 @@
+                     this.field_175024_d.func_178175_a(p_175016_1_.func_177230_c(), p_175016_2_);
+@@ -169,5 +199,17 @@
      public void func_110549_a(IResourceManager p_110549_1_)
      {
          this.field_175025_e.func_178268_a();
@@ -125,6 +91,7 @@
 +        {
 +            renderer.func_178268_a();
 +        }
++        // Do segmented models need notification of resourcepack-reload?
      }
 +    
 +    public void registerTessellatorRenderer(ITessellatorRenderer renderer)
@@ -133,16 +100,4 @@
 +    }
 +    
 +    private ArrayList<ITessellatorRenderer> registeredRenderers = new ArrayList();
-+    
-+    public void registerSegmentedModel(ISegmentedModel model)
-+    {
-+        int size = model.getSize();
-+        if (size > modelSegments.length)
-+        {
-+            modelSegments = new IBakedModel[size];
-+        }
-+        // Do segmented models need notification of resourcepack-reload?
-+    }
-+    
-+    private IBakedModel[] modelSegments = new IBakedModel[2];
  }

@@ -6,7 +6,5 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 
 public interface ISegmentedModel {
-    public int getSize();
-    
-    public void populate(IBlockAccess world, BlockPos position, IBlockState state, IBakedModel[] models);
+    public IBakedModel[] getModels(IBlockAccess world, BlockPos position, IBlockState state);
 }

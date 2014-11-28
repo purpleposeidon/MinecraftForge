@@ -12,15 +12,6 @@
  {
      private TextureAtlasSprite[] field_178272_a = new TextureAtlasSprite[2];
      private TextureAtlasSprite[] field_178271_b = new TextureAtlasSprite[2];
-@@ -25,7 +26,7 @@
-         this.func_178268_a();
-     }
- 
--    protected void func_178268_a()
-+    public void func_178268_a()
-     {
-         TextureMap texturemap = Minecraft.func_71410_x().func_147117_R();
-         this.field_178272_a[0] = texturemap.func_110572_b("minecraft:blocks/lava_still");
 @@ -287,4 +288,17 @@
  
          return 1.0F - f / (float)i;
